@@ -2,6 +2,10 @@
 
 A modular, efficient reinforcement learning environment for cooperative multi-agent training. The architecture separates game logic from visualization, enabling 10-100x faster training.
 
+## Demo
+
+https://github.com/user-attachments/assets/935f8d54-e3ae-4155-b117-8b1f2d5c1abb
+
 ## Architecture
 
 The package is organized into independent, reusable modules:
