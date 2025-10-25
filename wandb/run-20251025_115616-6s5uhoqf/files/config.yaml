@@ -1,0 +1,65 @@
+_wandb:
+    value:
+        cli_version: 0.22.2
+        e:
+            0rsz558sy0poduwiixp9qdu11lji0yrk:
+                args:
+                    - --wandb
+                codePath: train_stage_milestone_dqn.py
+                codePathLocal: train_stage_milestone_dqn.py
+                cpu_count: 4
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "509401362432"
+                        used: "405667954688"
+                email: bzhou1018@berkeley.edu
+                executable: C:\Users\benzh\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe
+                host: DESKTOP-NC64OI2
+                memory:
+                    total: "16918597632"
+                os: Windows-11-10.0.26100-SP0
+                program: C:\Users\benzh\Documents\firewater_rl_package\train_stage_milestone_dqn.py
+                python: CPython 3.13.9
+                root: C:\Users\benzh\Documents\firewater_rl_package
+                startedAt: "2025-10-25T18:56:16.383918Z"
+                writerId: 0rsz558sy0poduwiixp9qdu11lji0yrk
+        m: []
+        python_version: 3.13.9
+        t:
+            "1":
+                - 1
+                - 105
+            "2":
+                - 1
+                - 105
+            "3":
+                - 16
+            "4": 3.13.9
+            "5": 0.22.2
+            "8":
+                - 3
+            "12": 0.22.2
+            "13": windows-amd64
+agent:
+    value: DQN
+batch_size:
+    value: 64
+beta:
+    value: 50
+diam_0:
+    value: 1000
+diam_1:
+    value: 1000
+gamma:
+    value: 200
+learning_rate:
+    value: 0.0003
+max_steps:
+    value: 3000
+num_episodes:
+    value: 10000
+reward_function:
+    value: staged_milestone
+step_penalty:
+    value: -0.1

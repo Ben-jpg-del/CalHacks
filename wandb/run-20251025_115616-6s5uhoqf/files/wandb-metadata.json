@@ -1,0 +1,27 @@
+{
+  "os": "Windows-11-10.0.26100-SP0",
+  "python": "CPython 3.13.9",
+  "startedAt": "2025-10-25T18:56:16.383918Z",
+  "args": [
+    "--wandb"
+  ],
+  "program": "C:\\Users\\benzh\\Documents\\firewater_rl_package\\train_stage_milestone_dqn.py",
+  "codePath": "train_stage_milestone_dqn.py",
+  "codePathLocal": "train_stage_milestone_dqn.py",
+  "email": "bzhou1018@berkeley.edu",
+  "root": "C:\\Users\\benzh\\Documents\\firewater_rl_package",
+  "host": "DESKTOP-NC64OI2",
+  "executable": "C:\\Users\\benzh\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "509401362432",
+      "used": "405667954688"
+    }
+  },
+  "memory": {
+    "total": "16918597632"
+  },
+  "writerId": "0rsz558sy0poduwiixp9qdu11lji0yrk"
+}

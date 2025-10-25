@@ -1,0 +1,15 @@
+# Core dependencies
+numpy>=1.20.0
+pygame>=2.0.0
+
+# Gymnasium (modern Gym)
+gymnasium>=0.28.0
+
+# Optional: For deep learning (PyTorch)
+torch>=1.10.0
+
+# Optional: For RL libraries
+stable-baselines3>=2.0.0
+
+# Optional: For experiment tracking
+wandb>=0.12.0
