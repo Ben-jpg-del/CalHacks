@@ -70,7 +70,7 @@ python train_fast.py benchmark
 
 Expected output: **10,000+ steps/second** on modern hardware
 
-## 🧠 Implementing Your Own RL Agent
+## Implementing Your Own RL Agent
 
 The package provides a clean interface for implementing any RL algorithm:
 
