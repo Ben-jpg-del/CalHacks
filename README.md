@@ -207,7 +207,7 @@ train_headless(use_wandb=True)
 | Visualized Training | 100-500 steps/sec | Debugging, watching agent behavior |
 | Human Play | 60 FPS | Testing game mechanics |
 
-## 🔧 Advanced Usage
+## Advanced Usage
 
 ### Custom Levels
 ```python
