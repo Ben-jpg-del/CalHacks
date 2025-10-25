@@ -12,14 +12,19 @@ from example_dqn import DQNAgent
 from collections import deque
 import os
 
+# Import custom map
+from map_1 import LevelLibrary as Map1Library
+from map_config import LevelLibrary
 
-def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-staged-dqn", resume_episode=None):
+
+def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-staged-dqn", resume_episode=None, map_name="tutorial"):
     """Train DQN agents using staged milestone reward function
-    
+
     Args:
         use_wandb: Enable Weights & Biases logging
         wandb_project: W&B project name
         resume_episode: Episode number to resume from (e.g., 400 to load ep400 checkpoint)
+        map_name: Map to use for training ("tutorial" or "tower")
     """
 
     print("=" * 60)
@@ -34,6 +39,17 @@ def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-stag
     print("\nAgent Type: DQN with Dueling Architecture")
     print("Learning: ENABLED (not random!)")
     print("=" * 60 + "\n")
+
+    # Select map based on parameter
+    if map_name.lower() == "tower":
+        selected_level = Map1Library.get_tower_level()
+        print(f"Map: {selected_level.name} (Custom)")
+    else:
+        selected_level = LevelLibrary.get_tutorial_level()
+        print(f"Map: {selected_level.name} (Default)")
+    print(f"  Dimensions: {selected_level.width}x{selected_level.height}")
+    print(f"  Platforms: {len(selected_level.base_solids)}")
+    print(f"  Hazards: {list(selected_level.get_hazards().keys())}\n")
 
     # ========================================================================
     # CONFIGURE TRAINING
@@ -129,7 +145,7 @@ def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-stag
     # CREATE ENVIRONMENT WITH STAGED REWARDS
     # ========================================================================
 
-    env = FireWaterEnv(max_steps=max_steps_per_episode)
+    env = FireWaterEnv(level=selected_level, max_steps=max_steps_per_episode)
     reward_fn = StagedMilestoneRewardFunction(reward_config)
 
     # Override environment's reward calculation
@@ -433,38 +449,49 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Start fresh training
+  # Start fresh training on tutorial map (default)
   python train_stage_milestone_dqn.py
-  
+
+  # Train on tower/custom map
+  python train_stage_milestone_dqn.py --map tower
+
   # Start training with W&B logging
   python train_stage_milestone_dqn.py --wandb
-  
-  # Resume from episode 400
-  python train_stage_milestone_dqn.py --resume 400
-  
-  # Resume with W&B logging
-  python train_stage_milestone_dqn.py --resume 400 --wandb
+
+  # Resume from episode 400 on tower map
+  python train_stage_milestone_dqn.py --resume 400 --map tower
+
+  # Resume with W&B logging on custom map
+  python train_stage_milestone_dqn.py --resume 400 --wandb --map tower
         """
     )
-    
+
     parser.add_argument(
         "--wandb", "-w",
         action="store_true",
         help="Enable Weights & Biases logging"
     )
-    
+
     parser.add_argument(
         "--resume", "-r",
         type=int,
         metavar="EPISODE",
         help="Resume training from specified episode checkpoint (e.g., 400 to load ep400 checkpoint)"
     )
-    
+
     parser.add_argument(
         "--project",
         type=str,
         default="firewater-staged-dqn",
         help="W&B project name (default: firewater-staged-dqn)"
+    )
+
+    parser.add_argument(
+        "--map", "-m",
+        type=str,
+        default="tutorial",
+        choices=["tutorial", "tower"],
+        help="Map to use for training: tutorial (default) or tower (custom map)"
     )
     
     args = parser.parse_args()
@@ -473,6 +500,7 @@ Examples:
     print("\n" + "=" * 60)
     print("TRAINING CONFIGURATION")
     print("=" * 60)
+    print(f"  Map: {args.map}")
     print(f"  W&B Logging: {'ENABLED' if args.wandb else 'DISABLED'}")
     if args.wandb:
         print(f"  W&B Project: {args.project}")
@@ -483,5 +511,6 @@ Examples:
     train_dqn_with_staged_rewards(
         use_wandb=args.wandb,
         wandb_project=args.project,
-        resume_episode=args.resume
+        resume_episode=args.resume,
+        map_name=args.map
     )
