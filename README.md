@@ -1,25 +1,19 @@
-# Fire & Water RL Training Package
+# Fire & Water collaborative RL
 
-A modular, efficient reinforcement learning environment for cooperative multi-agent training. The architecture separates game logic from visualization, enabling 10-100x faster training.
+##  Dueling Double Deep Q-Network (DDQN)
 
-## Demo
+This implementation uses a **Dueling Double Deep Q-Network (DDQN)** with experience replay for cooperative multi-agent reinforcement learning in the Fire & Water puzzle environment.
+
+## Network Architecture
+
+### Input Layer
+- **Dimensions**: 52-dimensional state vector
+- **Components**: Agent position, velocities, proximity sensors, goal information
+
+W&B training stats over 500 episodes
+<img width="955" height="857" alt="image" src="https://github.com/user-attachments/assets/04f74eb6-7683-4596-884d-8c17dc27ce77" />
 
 https://github.com/user-attachments/assets/935f8d54-e3ae-4155-b117-8b1f2d5c1abb
-
-## Architecture
-
-The package is organized into independent, reusable modules:
-
-```
-firewater_rl_package/
-├── physics_engine.py      # Pure Python physics (no Pygame)
-├── map_config.py          # Level definitions and geometry
-├── game_environment.py    # Gym-like RL environment
-├── train_fast.py          # Headless training script
-├── visualize.py           # Pygame visualization
-├── example_dqn.py         # Example RL agent implementation
-└── README.md              # This file
-```
 
 ## Key Features
 
