@@ -2,7 +2,7 @@
 
 A modular, efficient reinforcement learning environment for cooperative multi-agent training. The architecture separates game logic from visualization, enabling 10-100x faster training.
 
-## 🏗️ Architecture
+## Architecture
 
 The package is organized into independent, reusable modules:
 
@@ -17,7 +17,7 @@ firewater_rl_package/
 └── README.md              # This file
 ```
 
-## 🚀 Key Features
+## Key Features
 
 - **Decoupled Design**: Physics engine works without Pygame
 - **Fast Training**: 10-100x speedup by disabling visualization
@@ -25,7 +25,7 @@ firewater_rl_package/
 - **Modular**: Easy to swap physics, maps, or RL algorithms
 - **Flexible**: Use with any RL framework (PyTorch, TensorFlow, JAX)
 
-## 📦 Installation
+## Installation
 
 ### Requirements
 ```bash
@@ -37,7 +37,7 @@ pip install numpy pygame
 pip install torch wandb  # PyTorch + experiment tracking
 ```
 
-## 🎮 Quick Start
+## Quick Start
 
 ### 1. Human Play Mode
 Test the game mechanics manually:
@@ -70,7 +70,7 @@ python train_fast.py benchmark
 
 Expected output: **10,000+ steps/second** on modern hardware
 
-## 🧠 Implementing Your Own RL Agent
+## Implementing Your Own RL Agent
 
 The package provides a clean interface for implementing any RL algorithm:
 
@@ -142,7 +142,7 @@ for episode in range(10000):
 
 See `example_dqn.py` for a complete implementation.
 
-## 🎯 Environment Details
+## Environment Details
 
 ### Action Space
 Each agent has 6 discrete actions:
@@ -171,7 +171,7 @@ The default reward function includes:
 
 **Customize rewards** in `game_environment.py` → `_calculate_rewards()`
 
-## 🏆 Training Tips
+## Training Tips
 
 ### 1. Start with Curriculum Learning
 ```bash
@@ -199,7 +199,7 @@ Enable Weights & Biases logging:
 train_headless(use_wandb=True)
 ```
 
-## 📊 Performance Comparison
+## Performance Comparison
 
 | Mode | Speed | Use Case |
 |------|-------|----------|
@@ -249,7 +249,7 @@ observations = [env.reset() for env in envs]
 # Batch process actions...
 ```
 
-## 🐛 Debugging
+## Debugging
 
 ### Visualize Specific Episode
 ```python
@@ -278,7 +278,7 @@ print("Water observation:", water_obs)
 print("State shape:", fire_obs.shape)  # Should be (52,)
 ```
 
-## 📈 Baseline Results
+## Baseline Results
 
 Random agents typically achieve:
 - Success rate: ~0.1%
@@ -287,7 +287,7 @@ Random agents typically achieve:
 
 Your trained agents should significantly outperform this!
 
-## 🤝 Contributing
+## Contributing
 
 To add new features:
 
@@ -295,20 +295,6 @@ To add new features:
 2. **New physics**: Modify `physics_engine.py`
 3. **New reward**: Update `game_environment.py`
 4. **New visualization**: Extend `visualize.py`
-
-## 📝 License
-
-MIT License - feel free to use for research or commercial projects.
-
-## 🙏 Acknowledgments
-
-Based on the cooperative puzzle game "Fireboy and Watergirl".
-
-## 📚 Next Steps
-
-1. Implement your RL algorithm (DQN, PPO, SAC, etc.)
-2. Design custom reward functions
-3. Create new levels with unique mechanics
 4. Train agents and track progress
 5. Visualize learned behaviors
 
