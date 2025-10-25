@@ -1,0 +1,226 @@
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║           🎯 GYM-BASED RL TRAINING - QUICK REFERENCE 🎯      ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+📦 NEW FILES ADDED:
+═══════════════════════════════════════════════════════════════
+✓ gym_wrapper.py          - Gymnasium compatibility layer
+✓ reward_functions.py     - Modular reward system
+✓ training_config.py      - Centralized hyperparameters
+✓ train_modular.py        - Main training skeleton
+✓ GYM_TRAINING_GUIDE.py   - Complete usage guide
+
+🚀 QUICK START (3 Commands):
+═══════════════════════════════════════════════════════════════
+1. pip install -r requirements.txt
+2. python train_modular.py defaults
+3. Watch your agents train!
+
+🎮 TRAINING MODES:
+═══════════════════════════════════════════════════════════════
+python train_modular.py defaults          → Standard training
+python train_modular.py custom-rewards    → Custom reward config
+python train_modular.py debug             → Fast debug mode
+python train_modular.py custom-config     → Full customization
+python train_modular.py from-file config.json → Load from file
+
+🎯 CUSTOMIZE REWARDS (3 Ways):
+═══════════════════════════════════════════════════════════════
+1. Quick Edit:
+   from reward_functions import RewardConfig
+   reward_config = RewardConfig()
+   reward_config.both_win_reward = 500.0
+   reward_config.step_penalty = -0.05
+
+2. Use Presets:
+   config.reward_function = "sparse"      # Win/lose only
+   config.reward_function = "dense"       # Distance shaping
+   config.reward_function = "safety"      # Avoid hazards
+   config.reward_function = "cooperation" # Teamwork focus
+
+3. Create Your Own:
+   class MyReward(BaseRewardFunction):
+       def calculate_rewards(self, ...):
+           # Your logic here
+           return fire_reward, water_reward
+
+⚙️ CUSTOMIZE TRAINING (2 Ways):
+═══════════════════════════════════════════════════════════════
+1. Use Presets:
+   from training_config import get_config
+   config = get_config('standard')    # Balanced
+   config = get_config('debug')       # Fast testing
+   config = get_config('performance') # High-speed
+   config = get_config('curriculum')  # Progressive
+
+2. Manual Config:
+   from training_config import TrainingConfig
+   config = TrainingConfig()
+   config.num_episodes = 50000
+   config.learning_rate = 1e-4
+   config.batch_size = 128
+   config.hidden_dim = 512
+   config.use_wandb = True
+
+🧠 USE WITH STABLE-BASELINES3:
+═══════════════════════════════════════════════════════════════
+from stable_baselines3 import PPO
+from gym_wrapper import FireWaterGymEnv
+
+env = FireWaterGymEnv(agent_type="fire")
+model = PPO("MlpPolicy", env, verbose=1)
+model.learn(total_timesteps=1000000)
+model.save("ppo_firewater")
+
+🔧 IMPLEMENT YOUR OWN AGENT:
+═══════════════════════════════════════════════════════════════
+class MyAgent:
+    def select_action(self, obs, training=True):
+        # Your policy here
+        return action
+    
+    def update(self, obs, action, reward, next_obs, done):
+        # Your learning update here
+        pass
+    
+    def save(self, path):
+        # Save model
+        pass
+
+# Use it
+from train_modular import ModularTrainer
+config = get_config('standard')
+trainer = ModularTrainer(config, 
+                        fire_agent=MyAgent(), 
+                        water_agent=MyAgent())
+trainer.train()
+
+📊 KEY CONFIGURATION PARAMETERS:
+═══════════════════════════════════════════════════════════════
+Training:
+  num_episodes: 10000
+  max_steps_per_episode: 3000
+  learning_rate: 3e-4
+  batch_size: 64
+  gamma: 0.99
+
+Network:
+  hidden_dim: 256
+  num_layers: 2
+  use_dueling: True
+
+Exploration:
+  epsilon_start: 1.0
+  epsilon_end: 0.01
+  epsilon_decay: 0.995
+
+Rewards:
+  both_win_reward: 100.0
+  death_penalty: -100.0
+  step_penalty: -0.01
+  cooperation_bonus: 10.0
+
+🎨 REWARD FUNCTION VALUES:
+═══════════════════════════════════════════════════════════════
+reward_config = RewardConfig()
+
+# Win/Lose
+reward_config.both_win_reward = 100.0
+reward_config.death_penalty = -100.0
+
+# Cooperation
+reward_config.bridge_activation = 10.0
+reward_config.gate_activation = 10.0
+reward_config.cooperation_bonus = 5.0
+
+# Progress
+reward_config.step_penalty = -0.01
+reward_config.distance_weight = 0.001
+
+# Safety
+reward_config.near_hazard_penalty = -0.5
+reward_config.hazard_distance_threshold = 50
+
+🏆 BEST PRACTICES:
+═══════════════════════════════════════════════════════════════
+1. Start with 'debug' config to test quickly
+2. Use 'dense' rewards for faster learning
+3. Enable W&B logging (config.use_wandb = True)
+4. Save checkpoints frequently (config.save_frequency = 500)
+5. Evaluate periodically (config.eval_frequency = 1000)
+6. Use vectorized envs for 10x speedup
+7. Start with sparse rewards, add shaping gradually
+
+🐛 COMMON ISSUES & FIXES:
+═══════════════════════════════════════════════════════════════
+Problem: Not learning
+Fix: config.reward_function = "dense"
+     reward_config.distance_weight = 0.01
+
+Problem: Too slow
+Fix: config.render_training = False
+     Use VectorizedEnv
+
+Problem: Agents die
+Fix: config.reward_function = "safety"
+     reward_config.death_penalty = -500
+
+Problem: No cooperation
+Fix: config.reward_function = "cooperation"
+     reward_config.cooperation_bonus = 20
+
+📁 FILE STRUCTURE:
+═══════════════════════════════════════════════════════════════
+Core Files:
+  physics_engine.py       - Game physics
+  map_config.py           - Level definitions
+  game_environment.py     - Base environment
+  
+Gym Integration:
+  gym_wrapper.py          - Gym compatibility ⭐ NEW
+  reward_functions.py     - Reward system ⭐ NEW
+  training_config.py      - Hyperparameters ⭐ NEW
+  train_modular.py        - Training script ⭐ NEW
+  
+Examples:
+  example_dqn.py          - DQN implementation
+  train_fast.py           - Headless training
+  visualize.py            - Pygame rendering
+
+Documentation:
+  GYM_TRAINING_GUIDE.py   - Complete guide ⭐ NEW
+  README.md               - Full documentation
+  SETUP.md                - Installation guide
+
+💡 EXAMPLE WORKFLOW:
+═══════════════════════════════════════════════════════════════
+# 1. Test installation
+python test_package.py
+
+# 2. Quick debug run
+python train_modular.py debug
+
+# 3. Customize rewards
+# Edit reward_functions.py or training_config.py
+
+# 4. Full training
+python train_modular.py defaults
+
+# 5. With W&B logging
+# Set config.use_wandb = True in train_modular.py
+
+# 6. Visualize results
+python visualize.py trained checkpoints/fire_final.pth
+
+📚 DOCUMENTATION:
+═══════════════════════════════════════════════════════════════
+Quick Start:   GYM_TRAINING_GUIDE.py
+Full Guide:    README.md
+Setup Help:    SETUP.md
+Examples:      example_dqn.py, train_fast.py
+
+═══════════════════════════════════════════════════════════════
+           Ready to train? Run: python train_modular.py
+═══════════════════════════════════════════════════════════════
