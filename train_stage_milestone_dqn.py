@@ -13,11 +13,19 @@ from collections import deque
 import os
 
 
-def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-staged-dqn"):
-    """Train DQN agents using staged milestone reward function"""
+def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-staged-dqn", resume_episode=None):
+    """Train DQN agents using staged milestone reward function
+    
+    Args:
+        use_wandb: Enable Weights & Biases logging
+        wandb_project: W&B project name
+        resume_episode: Episode number to resume from (e.g., 400 to load ep400 checkpoint)
+    """
 
     print("=" * 60)
     print("TRAINING DQN WITH STAGED MILESTONE REWARDS")
+    if resume_episode:
+        print(f"RESUMING FROM EPISODE {resume_episode}")
     print("=" * 60)
     print("\nReward Structure:")
     print("  Stage 0: Navigate to plates -> Progress + beta bonus")
@@ -181,6 +189,56 @@ def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-stag
     print("  Learning: ENABLED\n")
 
     # ========================================================================
+    # LOAD CHECKPOINT IF RESUMING
+    # ========================================================================
+
+    start_episode = 0
+    if resume_episode is not None:
+        print("=" * 60)
+        print(f"LOADING CHECKPOINT FROM EPISODE {resume_episode}")
+        print("=" * 60)
+        
+        fire_checkpoint_path = f"checkpoints/fire_staged_dqn_ep{resume_episode}.pth"
+        water_checkpoint_path = f"checkpoints/water_staged_dqn_ep{resume_episode}.pth"
+        
+        # Check if checkpoint files exist
+        if not os.path.exists(fire_checkpoint_path):
+            print(f"ERROR: Fire checkpoint not found: {fire_checkpoint_path}")
+            print("Available checkpoints:")
+            if os.path.exists("checkpoints"):
+                checkpoints = [f for f in os.listdir("checkpoints") if f.startswith("fire_staged_dqn_ep")]
+                for cp in sorted(checkpoints):
+                    print(f"  - {cp}")
+            return
+        
+        if not os.path.exists(water_checkpoint_path):
+            print(f"ERROR: Water checkpoint not found: {water_checkpoint_path}")
+            print("Available checkpoints:")
+            if os.path.exists("checkpoints"):
+                checkpoints = [f for f in os.listdir("checkpoints") if f.startswith("water_staged_dqn_ep")]
+                for cp in sorted(checkpoints):
+                    print(f"  - {cp}")
+            return
+        
+        # Load checkpoints
+        print(f"Loading fire agent from: {fire_checkpoint_path}")
+        fire_agent.load(fire_checkpoint_path)
+        
+        print(f"Loading water agent from: {water_checkpoint_path}")
+        water_agent.load(water_checkpoint_path)
+        
+        # Set starting episode
+        start_episode = resume_episode
+        
+        print("\nCheckpoint loaded successfully!")
+        print(f"  Fire epsilon: {fire_agent.epsilon:.3f}")
+        print(f"  Water epsilon: {water_agent.epsilon:.3f}")
+        print(f"  Fire steps: {fire_agent.steps}")
+        print(f"  Fire updates: {fire_agent.updates}")
+        print(f"  Resuming from episode: {start_episode + 1}")
+        print("=" * 60 + "\n")
+
+    # ========================================================================
     # TRAINING LOOP
     # ========================================================================
 
@@ -205,7 +263,7 @@ def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-stag
     training_start = time.time()
     last_log_time = training_start
 
-    for episode in range(num_episodes):
+    for episode in range(start_episode, num_episodes):
         episode_start = time.time()
         fire_obs, water_obs = env.reset()
         reward_fn.reset()  # Reset stage tracking
@@ -358,6 +416,7 @@ def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-stag
 
 if __name__ == "__main__":
     import sys
+    import argparse
 
     # Check for PyTorch
     try:
@@ -369,11 +428,60 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Parse command line arguments
-    use_wandb = False
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "--wandb" or sys.argv[1] == "-w":
-            use_wandb = True
-            print("W&B logging ENABLED via command line flag\n")
+    parser = argparse.ArgumentParser(
+        description="Train DQN agents with staged milestone rewards",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Start fresh training
+  python train_stage_milestone_dqn.py
+  
+  # Start training with W&B logging
+  python train_stage_milestone_dqn.py --wandb
+  
+  # Resume from episode 400
+  python train_stage_milestone_dqn.py --resume 400
+  
+  # Resume with W&B logging
+  python train_stage_milestone_dqn.py --resume 400 --wandb
+        """
+    )
+    
+    parser.add_argument(
+        "--wandb", "-w",
+        action="store_true",
+        help="Enable Weights & Biases logging"
+    )
+    
+    parser.add_argument(
+        "--resume", "-r",
+        type=int,
+        metavar="EPISODE",
+        help="Resume training from specified episode checkpoint (e.g., 400 to load ep400 checkpoint)"
+    )
+    
+    parser.add_argument(
+        "--project",
+        type=str,
+        default="firewater-staged-dqn",
+        help="W&B project name (default: firewater-staged-dqn)"
+    )
+    
+    args = parser.parse_args()
+    
+    # Display configuration
+    print("\n" + "=" * 60)
+    print("TRAINING CONFIGURATION")
+    print("=" * 60)
+    print(f"  W&B Logging: {'ENABLED' if args.wandb else 'DISABLED'}")
+    if args.wandb:
+        print(f"  W&B Project: {args.project}")
+    print(f"  Resume Mode: {'YES (Episode ' + str(args.resume) + ')' if args.resume else 'NO (Fresh Start)'}")
+    print("=" * 60 + "\n")
 
     # Run training
-    train_dqn_with_staged_rewards(use_wandb=use_wandb)
+    train_dqn_with_staged_rewards(
+        use_wandb=args.wandb,
+        wandb_project=args.project,
+        resume_episode=args.resume
+    )
