@@ -2,7 +2,7 @@
 
 ##  Dueling Double Deep Q-Network (DDQN)
 
-This implementation uses a **Dueling Double Deep Q-Network (DDQN)** with experience replay for cooperative multi-agent reinforcement learning in the Fire & Water puzzle environment.
+This implementation uses a **Dueling Double Deep Q-Network (DDQN)** for cooperative multi-agent reinforcement learning in the Fire & Water puzzle environment.
 
 ## Network Architecture
 
