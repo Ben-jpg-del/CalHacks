@@ -297,5 +297,3 @@ To add new features:
 4. **New visualization**: Extend `visualize.py`
 4. Train agents and track progress
 5. Visualize learned behaviors
-
-**Good luck training!** 🚀
