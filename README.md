@@ -1,4 +1,4 @@
-# Fire & Water collaborative RL
+# Multi Agent Collaborative Reinforcement Learning
 
 ##  Dueling Double Deep Q-Network (DDQN)
 
