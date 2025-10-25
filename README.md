@@ -199,7 +199,7 @@ Enable Weights & Biases logging:
 train_headless(use_wandb=True)
 ```
 
-## 📊 Performance Comparison
+## Performance Comparison
 
 | Mode | Speed | Use Case |
 |------|-------|----------|
@@ -248,13 +248,6 @@ envs = [FireWaterEnv() for _ in range(16)]
 observations = [env.reset() for env in envs]
 # Batch process actions...
 ```
-
-## Baseline Results
-
-Random agents typically achieve:
-- Success rate: ~0.1%
-- Average episode length: ~500 steps
-- Average reward: -50
 
 ## Contributing
 
