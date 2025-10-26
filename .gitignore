@@ -56,3 +56,4 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+checkpoints/fire_staged_dqn_ep500.pth
