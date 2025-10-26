@@ -382,7 +382,7 @@ def human_play_mode(level_name="tutorial"):
     print("Human play mode ended")
 
 
-def visualize_trained_agent(fire_model_path: str = None, water_model_path: str = None, num_episodes: int = 10, level_name="tutorial"):
+def visualize_trained_agent(fire_model_path: str = None, water_model_path: str = None, num_episodes: int = 10, level_name="tutorial", fps=60):
     """
     Visualize a trained agent
 
@@ -391,21 +391,130 @@ def visualize_trained_agent(fire_model_path: str = None, water_model_path: str =
         water_model_path: Path to water agent trained model weights
         num_episodes: Number of episodes to visualize
         level_name: Name of the level to use
+        fps: Frames per second for visualization
     """
-    print(f"Visualizing trained agents:")
-    print(f"  Fire agent: {fire_model_path}")
-    print(f"  Water agent: {water_model_path}")
-    print("Note: Replace with your actual agent loading code\n")
+    print("=" * 60)
+    print("VISUALIZING TRAINED AGENTS")
+    print("=" * 60)
+    print(f"Fire agent checkpoint: {fire_model_path}")
+    print(f"Water agent checkpoint: {water_model_path}")
+    print(f"Map: {level_name}")
+    print("=" * 60 + "\n")
 
-    # TODO: Load your trained agents here
-    # fire_agent = YourRLAgent()
-    # water_agent = YourRLAgent()
-    # fire_agent.load(fire_model_path)
-    # water_agent.load(water_model_path)
+    # Try to load trained agents
+    try:
+        import torch
+        from example_dqn import DQNAgent
 
-    # For now, use random agents as placeholder
-    print("Warning: Using random agents (implement agent loading)")
-    visualize_random_agents(num_episodes, level_name=level_name)
+        # Create agents
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        print(f"Using device: {device}\n")
+
+        fire_agent = DQNAgent(state_dim=52, action_dim=6, device=device)
+        water_agent = DQNAgent(state_dim=52, action_dim=6, device=device)
+
+        # Load checkpoints
+        if fire_model_path:
+            fire_agent.load(fire_model_path)
+        if water_model_path:
+            water_agent.load(water_model_path)
+
+        # Set to evaluation mode (no exploration)
+        fire_agent.epsilon = 0.0
+        water_agent.epsilon = 0.0
+
+        print("Agents loaded successfully!")
+        print(f"Fire agent epsilon: {fire_agent.epsilon}")
+        print(f"Water agent epsilon: {water_agent.epsilon}\n")
+
+        # Visualize the trained agents
+        _visualize_agents(fire_agent, water_agent, num_episodes, level_name, fps)
+
+    except ImportError as e:
+        print(f"ERROR: Could not import required modules: {e}")
+        print("\nMake sure you have PyTorch installed:")
+        print("  pip install torch\n")
+        print("Falling back to random agents...")
+        visualize_random_agents(num_episodes, level_name=level_name, fps=fps)
+    except Exception as e:
+        print(f"ERROR: Failed to load agents: {e}")
+        print("Falling back to random agents...")
+        visualize_random_agents(num_episodes, level_name=level_name, fps=fps)
+
+
+def _visualize_agents(fire_agent, water_agent, num_episodes, level_name, fps):
+    """Internal function to visualize loaded agents"""
+    print(f"Starting visualization for {num_episodes} episodes...")
+    print("Press ESC to quit, R to reset\n")
+
+    # Load the specified level
+    level = get_level_from_name(level_name)
+
+    env = FireWaterEnv(level=level)
+    vis = Visualizer()
+
+    success_count = 0
+
+    for episode in range(num_episodes):
+        fire_obs, water_obs = env.reset()
+        done = False
+        episode_reward = 0
+
+        while not done:
+            # Handle events
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    print(f"\nCompleted {episode} episodes")
+                    print(f"Success rate: {success_count}/{episode} ({success_count/max(episode,1)*100:.1f}%)")
+                    return
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        pg.quit()
+                        print(f"\nCompleted {episode} episodes")
+                        print(f"Success rate: {success_count}/{episode} ({success_count/max(episode,1)*100:.1f}%)")
+                        return
+                    if event.key == pg.K_r:
+                        print("Manual reset")
+                        done = True
+
+            # Get actions from trained agents (greedy, no exploration)
+            fire_action = fire_agent.select_action(fire_obs, training=False)
+            water_action = water_agent.select_action(water_obs, training=False)
+
+            # Step environment
+            (fire_obs, water_obs), (fire_reward, water_reward), (fire_done, water_done), info = env.step(
+                fire_action, water_action
+            )
+
+            episode_reward += fire_reward + water_reward
+
+            # Render
+            metrics = {
+                'episode': episode + 1,
+                'success_rate': success_count / max(episode, 1)
+            }
+            vis.render(env, metrics)
+            vis.tick(fps)
+
+            if fire_done or water_done:
+                done = True
+                if info.get('both_won', False):
+                    success_count += 1
+                    print(f"Episode {episode + 1}: SUCCESS! Reward: {episode_reward:.2f}")
+                else:
+                    print(f"Episode {episode + 1}: Failed. Reward: {episode_reward:.2f}")
+
+                time.sleep(1)  # Pause to see result
+
+    pg.quit()
+    print("\n" + "=" * 60)
+    print("VISUALIZATION COMPLETE")
+    print("=" * 60)
+    print(f"Total episodes: {num_episodes}")
+    print(f"Successes: {success_count}")
+    print(f"Success rate: {success_count/num_episodes*100:.1f}%")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
@@ -498,7 +607,7 @@ Examples:
             water_model_path = None
 
         episodes = 10  # Default number of episodes for trained agent visualization
-        visualize_trained_agent(fire_model_path, water_model_path, episodes, level_name=args.map)
+        visualize_trained_agent(fire_model_path, water_model_path, episodes, level_name=args.map, fps=args.fps)
     else:
         print(f"Unknown mode: {args.mode}")
         print("Available modes: human, random, trained")
