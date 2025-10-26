@@ -15,6 +15,10 @@ W&B training stats over 500 episodes
 
 https://github.com/user-attachments/assets/935f8d54-e3ae-4155-b117-8b1f2d5c1abb
 
+
+https://github.com/user-attachments/assets/31897d70-5d0f-4cd9-8ffd-30527a438d2e
+
+
 ## Reward Functions
 
 $$
