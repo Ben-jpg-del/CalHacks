@@ -382,23 +382,26 @@ def human_play_mode(level_name="tutorial"):
     print("Human play mode ended")
 
 
-def visualize_trained_agent(model_path: str = None, num_episodes: int = 10, level_name="tutorial"):
+def visualize_trained_agent(fire_model_path: str = None, water_model_path: str = None, num_episodes: int = 10, level_name="tutorial"):
     """
     Visualize a trained agent
 
     Args:
-        model_path: Path to trained model weights
+        fire_model_path: Path to fire agent trained model weights
+        water_model_path: Path to water agent trained model weights
         num_episodes: Number of episodes to visualize
         level_name: Name of the level to use
     """
-    print(f"Visualizing trained agent from: {model_path}")
+    print(f"Visualizing trained agents:")
+    print(f"  Fire agent: {fire_model_path}")
+    print(f"  Water agent: {water_model_path}")
     print("Note: Replace with your actual agent loading code\n")
 
     # TODO: Load your trained agents here
     # fire_agent = YourRLAgent()
     # water_agent = YourRLAgent()
-    # fire_agent.load(model_path + "_fire.pth")
-    # water_agent.load(model_path + "_water.pth")
+    # fire_agent.load(fire_model_path)
+    # water_agent.load(water_model_path)
 
     # For now, use random agents as placeholder
     print("Warning: Using random agents (implement agent loading)")
@@ -425,8 +428,11 @@ Examples:
   # List all available maps
   python visualize.py --list-maps
 
-  # Visualize trained agent on tower level
-  python visualize.py trained checkpoints/model.pth --map tower
+  # Visualize trained agents on tower level (both fire and water)
+  python visualize.py trained checkpoints/fire_staged_dqn_ep500.pth checkpoints/water_staged_dqn_ep500.pth --map tower
+
+  # Visualize trained agents (auto-detect water path from fire path)
+  python visualize.py trained checkpoints/fire_staged_dqn_ep500.pth --map tower
         """
     )
 
@@ -439,10 +445,10 @@ Examples:
     )
 
     parser.add_argument(
-        "episodes_or_model",
-        nargs="?",
+        "episodes_or_models",
+        nargs="*",
         default=None,
-        help="Number of episodes (for random mode) or model path (for trained mode)"
+        help="Number of episodes (for random mode) or model paths (for trained mode: fire_model water_model)"
     )
 
     parser.add_argument(
@@ -476,12 +482,23 @@ Examples:
     if args.mode == "human":
         human_play_mode(level_name=args.map)
     elif args.mode == "random":
-        episodes = int(args.episodes_or_model) if args.episodes_or_model else 5
+        episodes = int(args.episodes_or_models[0]) if args.episodes_or_models and len(args.episodes_or_models) > 0 else 5
         visualize_random_agents(episodes, fps=args.fps, level_name=args.map)
     elif args.mode == "trained":
-        model_path = args.episodes_or_model if args.episodes_or_model else None
+        # Handle both single path (fire only) or dual paths (fire and water)
+        if args.episodes_or_models and len(args.episodes_or_models) >= 2:
+            fire_model_path = args.episodes_or_models[0]
+            water_model_path = args.episodes_or_models[1]
+        elif args.episodes_or_models and len(args.episodes_or_models) == 1:
+            # If only one path given, assume it's the fire path and infer water path
+            fire_model_path = args.episodes_or_models[0]
+            water_model_path = fire_model_path.replace("fire_", "water_")
+        else:
+            fire_model_path = None
+            water_model_path = None
+
         episodes = 10  # Default number of episodes for trained agent visualization
-        visualize_trained_agent(model_path, episodes, level_name=args.map)
+        visualize_trained_agent(fire_model_path, water_model_path, episodes, level_name=args.map)
     else:
         print(f"Unknown mode: {args.mode}")
         print("Available modes: human, random, trained")
