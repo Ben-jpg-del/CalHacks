@@ -15,13 +15,67 @@ W&B training stats over 500 episodes
 
 https://github.com/user-attachments/assets/935f8d54-e3ae-4155-b117-8b1f2d5c1abb
 
-## Key Features
+## Reward Functions
 
-- **Decoupled Design**: Physics engine works without Pygame
-- **Fast Training**: 10-100x speedup by disabling visualization
-- **Gym-like Interface**: Standard `reset()` and `step()` API
-- **Modular**: Easy to swap physics, maps, or RL algorithms
-- **Flexible**: Use with any RL framework (PyTorch, TensorFlow, JAX)
+$$
+\mathcal{A}=\{F,W\},\qquad p^{(i)}_t\in\mathbb{R}^2\ (i\in\mathcal{A})
+$$
+
+$$
+q^{(i)}\in\mathbb{R}^2,\qquad e^{(i)}\in\mathbb{R}^2
+$$
+
+$$
+\mathcal{Q}^{(i)}=\{x:\|x-q^{(i)}\|_2\le \rho_p\},\qquad
+\mathcal{E}^{(i)}=\{x:\|x-e^{(i)}\|_2\le \rho_e\}
+$$
+
+$$
+H_t=\prod_{i\in\mathcal{A}}\mathbf{1}\{p^{(i)}_t\in\mathcal{Q}^{(i)}\},\qquad
+F_t=\prod_{i\in\mathcal{A}}\mathbf{1}\{p^{(i)}_t\in\mathcal{E}^{(i)}\}
+$$
+
+$$
+s_t\in\{0,1,2\},\qquad
+s_{t+1}=
+\begin{cases}
+1,& s_t=0\ \land\ H_{t+1}=1\\[2pt]
+2,& s_t=1\ \land\ F_{t+1}=1\\[2pt]
+s_t,& \text{otherwise}
+\end{cases}
+$$
+
+$$
+g^{(i)}(s)=
+\begin{cases}
+q^{(i)},& s=0\\
+e^{(i)},& s\in\{1,2\}
+\end{cases}
+$$
+
+$$
+D_t=\sum_{i\in\mathcal{A}}\frac{\|p^{(i)}_t-g^{(i)}(s_t)\|_2}{\mathrm{diam}_{s_t}},
+\qquad
+\Phi_t=-D_t
+$$
+
+$$
+[z]_+=\max(z,0)
+$$
+
+$$
+r^{\text{prog}}_t=\big[D_t-D_{t+1}\big]_+
+$$
+
+$$
+r^{\text{plates}}_t=\beta\,\mathbf{1}\{s_t=0,\ s_{t+1}=1\},
+\qquad
+r^{\text{finish}}_t=\Gamma\,\mathbf{1}\{s_t=1,\ s_{t+1}=2\}
+$$
+
+$$
+r^{+}_t=r^{\text{prog}}_t+r^{\text{plates}}_t+r^{\text{finish}}_t
+$$
 
 ## Installation
 
