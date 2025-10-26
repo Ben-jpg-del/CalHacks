@@ -17,14 +17,15 @@ from map_1 import LevelLibrary as Map1Library
 from map_config import LevelLibrary
 
 
-def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-staged-dqn", resume_episode=None, map_name="tutorial"):
+def train_dqn_with_staged_rewards(use_wandb=False, wandb_project="firewater-staged-dqn", resume_episode=None, map_name="tutorial", curriculum_learning=False):
     """Train DQN agents using staged milestone reward function
 
     Args:
         use_wandb: Enable Weights & Biases logging
         wandb_project: W&B project name
         resume_episode: Episode number to resume from (e.g., 400 to load ep400 checkpoint)
-        map_name: Map to use for training ("tutorial" or "tower")
+        map_name: Map to use for training ("tutorial" or "tower") - ignored if curriculum_learning=True
+        curriculum_learning: If True, trains on multiple maps in sequence (tutorial → tower)
     """
 
     print("=" * 60)
