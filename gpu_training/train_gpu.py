@@ -341,9 +341,15 @@ def train_gpu(
     success_rates = deque(maxlen=100)
 
     print("🚀 Starting GPU training...\n")
+    print("NOTE: First episode may take a few minutes to initialize...")
+    print("You should see progress updates every few seconds.\n")
+    import sys
+    sys.stdout.flush()  # Force output to show immediately
+
     start_time = time.time()
 
     for episode in range(num_episodes):
+        episode_start = time.time()
         # Reset environments
         fire_obs, water_obs = env.reset()
 
@@ -444,21 +450,32 @@ def train_gpu(
         successes = sum(info['both_won'] for info in infos)
         success_rates.append(successes / num_envs * 100)
 
-        # Logging
+        # Print quick progress after EVERY episode
+        episode_time = time.time() - episode_start
+        print(f"Ep {episode + 1}/{num_episodes} | "
+              f"Steps: {steps} | "
+              f"Reward: {episode_reward/steps if steps > 0 else 0:.2f} | "
+              f"Time: {episode_time:.1f}s | "
+              f"Success: {success_rates[-1]:.0f}%", flush=True)
+
+        # Detailed logging every N episodes
         if (episode + 1) % log_freq == 0:
             avg_reward = np.mean(episode_rewards)
             avg_success = np.mean(success_rates)
             elapsed = time.time() - start_time
             steps_per_sec = total_steps / elapsed
 
-            print(f"Episode {episode + 1}/{num_episodes}")
+            print(f"\n{'='*60}")
+            print(f"Episode {episode + 1}/{num_episodes} - DETAILED STATS")
+            print(f"{'='*60}")
             print(f"  Avg Reward: {avg_reward:.2f}")
             print(f"  Success Rate: {avg_success:.1f}%")
             print(f"  Epsilon: {epsilon:.3f}")
             print(f"  Steps/sec: {steps_per_sec:.0f}")
             print(f"  Buffer: {len(fire_buffer)}")
-            print(f"  Time: {elapsed/60:.1f}m")
-            print()
+            print(f"  Total Time: {elapsed/60:.1f}m")
+            print(f"  ETA: {(elapsed/60)/(episode+1)*(num_episodes-episode-1):.1f}m")
+            print(f"{'='*60}\n", flush=True)
 
             if use_wandb:
                 wandb.log({
