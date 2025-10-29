@@ -6,6 +6,7 @@ Compatible with existing checkpoint format for visualization
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 from collections import deque
