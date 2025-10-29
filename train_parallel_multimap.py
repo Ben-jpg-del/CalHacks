@@ -332,8 +332,9 @@ def train_parallel_multimap(
         episode_reward = 0
         episode_steps = 0
         done_mask = torch.zeros(env.num_envs, dtype=torch.bool, device=device)
+        max_steps = 3000  # Prevent episodes from running too long
 
-        while not done_mask.all():
+        while not done_mask.all() and episode_steps < max_steps:
             # Select actions for all environments
             fire_actions = fire_agent.select_actions(fire_obs, training=True)
             water_actions = water_agent.select_actions(water_obs, training=True)
