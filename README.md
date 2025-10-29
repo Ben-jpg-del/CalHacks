@@ -257,3 +257,7 @@ To add new features:
 2. **New physics**: Modify `physics_engine.py`
 3. **New reward**: Update `game_environment.py`
 4. **New visualization**: Extend `visualize.py`
+
+
+# Command line input to resume training:
+'''python train_stage_milestone_dqn.py --resume 400 --wandb'''

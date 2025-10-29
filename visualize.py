@@ -18,6 +18,14 @@ except ImportError:
     CUSTOM_MAPS_AVAILABLE = False
     print("Warning: map_1.py not found. Custom maps unavailable.")
 
+# Import map_2
+try:
+    from map_2 import LevelLibrary as Map2Library
+    MAP2_AVAILABLE = True
+except ImportError:
+    MAP2_AVAILABLE = False
+    print("Warning: map_2.py not found.")
+
 
 # Colors
 RED = (220, 60, 60)
@@ -36,7 +44,7 @@ def get_level_from_name(level_name: str):
     Get a level configuration from its name
 
     Args:
-        level_name: Name of the level ("tutorial", "tower", "empty")
+        level_name: Name of the level ("tutorial", "tower", "map2", "empty")
 
     Returns:
         LevelConfig object
@@ -47,11 +55,18 @@ def get_level_from_name(level_name: str):
         return LevelLibrary.get_tutorial_level()
     elif level_name == "tower" and CUSTOM_MAPS_AVAILABLE:
         return Map1Library.get_tower_level()
+    elif level_name == "map2" and MAP2_AVAILABLE:
+        return Map2Library.get_map2_level()
     elif level_name == "empty":
         return LevelLibrary.create_empty_level()
     else:
         print(f"Unknown level: {level_name}")
-        print("Available levels: tutorial, tower (if map_1.py exists), empty")
+        available = ["tutorial", "empty"]
+        if CUSTOM_MAPS_AVAILABLE:
+            available.append("tower")
+        if MAP2_AVAILABLE:
+            available.append("map2")
+        print(f"Available levels: {', '.join(available)}")
         print("Using tutorial level as default")
         return LevelLibrary.get_tutorial_level()
 
@@ -64,6 +79,8 @@ def list_available_maps():
     print("  tutorial  - Default tutorial level (horizontal layout)")
     if CUSTOM_MAPS_AVAILABLE:
         print("  tower     - The Tower Ascent (vertical climbing puzzle)")
+    if MAP2_AVAILABLE:
+        print("  map2      - Your custom map 2")
     print("  empty     - Empty level with just boundary walls")
     print("=" * 60 + "\n")
 
