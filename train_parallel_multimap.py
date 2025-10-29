@@ -12,6 +12,7 @@ from collections import deque
 import time
 from typing import Optional, Dict
 import os
+import wandb
 
 from parallel_multi_map_env import ParallelMultiMapEnv, CurriculumMultiMapEnv, MapRegistry
 from example_dqn import DQNetwork, ReplayBuffer
@@ -193,7 +194,10 @@ def train_parallel_multimap(
     save_freq: int = 100,
     log_freq: int = 10,
     device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
-    resume_from: Optional[str] = None
+    resume_from: Optional[str] = None,
+    use_wandb: bool = False,
+    wandb_project: str = 'firewater-multimap',
+    wandb_run_name: Optional[str] = None
 ):
     """
     Train agents with parallel multi-map environments
@@ -210,6 +214,9 @@ def train_parallel_multimap(
         log_freq: Log metrics every N episodes
         device: PyTorch device
         resume_from: Path to checkpoint directory to resume from
+        use_wandb: Whether to use Weights & Biases logging
+        wandb_project: W&B project name
+        wandb_run_name: W&B run name (optional)
     """
     print("=" * 80)
     print("PARALLEL MULTI-MAP TRAINING")
@@ -219,7 +226,27 @@ def train_parallel_multimap(
     print(f"Num environments per map: {num_envs_per_map}")
     print(f"Curriculum learning: {use_curriculum}")
     print(f"Reward type: {reward_type}")
+    print(f"W&B Logging: {use_wandb}")
     print("=" * 80 + "\n")
+
+    # Initialize wandb if enabled
+    if use_wandb:
+        wandb.init(
+            project=wandb_project,
+            name=wandb_run_name,
+            config={
+                'num_episodes': num_episodes,
+                'num_envs_per_map': num_envs_per_map,
+                'use_curriculum': use_curriculum,
+                'curriculum_schedule': curriculum_schedule,
+                'reward_type': reward_type,
+                'device': device,
+                'map_distribution': map_distribution,
+                'available_maps': MapRegistry.get_map_names(),
+            },
+            resume='allow' if resume_from else False
+        )
+        print(f"✅ W&B initialized: {wandb.run.name}\n")
 
     # Create save directory
     os.makedirs(save_dir, exist_ok=True)
@@ -365,14 +392,32 @@ def train_parallel_multimap(
             print(f"  Water Epsilon: {water_agent.epsilon:.3f}")
 
             # Per-map success rates
+            per_map_metrics = {}
             for map_name, successes in map_success_rates.items():
                 if len(successes) > 0:
                     map_success = np.mean(successes) * 100
                     print(f"  {map_name.capitalize()} Success: {map_success:.1f}%")
+                    per_map_metrics[f'success_rate/{map_name}'] = map_success
 
             print(f"  Time: {elapsed/60:.1f}m")
             print(f"  Buffer: {len(fire_agent.memory)}")
             print()
+
+            # Log to wandb
+            if use_wandb:
+                log_dict = {
+                    'episode': episode + 1,
+                    'avg_reward': avg_reward,
+                    'avg_episode_length': avg_length,
+                    'success_rate': avg_success,
+                    'fire_epsilon': fire_agent.epsilon,
+                    'water_epsilon': water_agent.epsilon,
+                    'buffer_size': len(fire_agent.memory),
+                    'elapsed_time_minutes': elapsed / 60,
+                }
+                # Add per-map metrics
+                log_dict.update(per_map_metrics)
+                wandb.log(log_dict, step=episode + 1)
 
         # Save checkpoints
         if (episode + 1) % save_freq == 0:
@@ -401,6 +446,31 @@ def train_parallel_multimap(
     print(f"Models saved to: {save_dir}")
     print("=" * 80)
 
+    # Log final metrics to wandb
+    if use_wandb:
+        final_metrics = {
+            'final/total_time_hours': (time.time() - start_time) / 3600,
+            'final/success_rate': np.mean(success_rate_tracker) * 100,
+        }
+        for map_name, successes in map_success_rates.items():
+            if len(successes) > 0:
+                final_metrics[f'final/success_rate_{map_name}'] = np.mean(successes) * 100
+
+        wandb.log(final_metrics)
+
+        # Save model artifacts
+        artifact = wandb.Artifact(
+            name=f'firewater-agents-{wandb.run.id}',
+            type='model',
+            description='Final trained Fire and Water agents'
+        )
+        artifact.add_file(os.path.join(final_dir, 'fire_agent.pth'))
+        artifact.add_file(os.path.join(final_dir, 'water_agent.pth'))
+        wandb.log_artifact(artifact)
+
+        wandb.finish()
+        print("✅ W&B run finished and artifacts saved\n")
+
     env.close()
 
 
@@ -415,6 +485,9 @@ if __name__ == "__main__":
     parser.add_argument('--save-dir', type=str, default='checkpoints_multimap')
     parser.add_argument('--resume-from', type=str, default=None, help='Resume from checkpoint directory')
     parser.add_argument('--device', type=str, default='cuda', choices=['cuda', 'cpu'])
+    parser.add_argument('--wandb', action='store_true', help='Enable Weights & Biases logging')
+    parser.add_argument('--wandb-project', type=str, default='firewater-multimap', help='W&B project name')
+    parser.add_argument('--wandb-run-name', type=str, default=None, help='W&B run name')
 
     args = parser.parse_args()
 
@@ -425,5 +498,8 @@ if __name__ == "__main__":
         reward_type=args.reward,
         save_dir=args.save_dir,
         device=args.device,
-        resume_from=args.resume_from
+        resume_from=args.resume_from,
+        use_wandb=args.wandb,
+        wandb_project=args.wandb_project,
+        wandb_run_name=args.wandb_run_name
     )
